@@ -40,7 +40,6 @@ Welcome to the Danmu TTS Server documentation! This is a high-performance Text-t
 
 ### Deployment
 
-- [Docker Deployment](deployment/docker.md) - Containerized deployment
 - [Production Setup](deployment/production.md) - Production considerations
 - [Monitoring](deployment/monitoring.md) - Health checks and metrics
 
@@ -58,7 +57,7 @@ The Danmu TTS Server is designed to provide real-time text-to-speech conversion 
 - **High Performance**: GPU acceleration and intelligent caching
 - **Real-time Processing**: WebSocket support for instant responses
 - **Easy Integration**: RESTful API and comprehensive documentation
-- **Production Ready**: Docker support and monitoring capabilities
+- **Production Ready**: Monitoring capabilities and optimized performance
 
 ## Support
 

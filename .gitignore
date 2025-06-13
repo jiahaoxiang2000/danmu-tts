@@ -40,9 +40,6 @@ models/
 .DS_Store
 Thumbs.db
 
-# Docker
-.dockerignore
-
 # Environment variables
 .env
 .env.local

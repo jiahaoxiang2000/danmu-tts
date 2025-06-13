@@ -245,27 +245,6 @@ uv pip freeze > requirements.lock
 uv pip install -r requirements.lock
 ```
 
-## Docker with UV
-
-Updated Dockerfile for UV:
-
-```dockerfile
-FROM python:3.11-slim
-
-# Install UV
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
-
-WORKDIR /app
-COPY pyproject.toml .
-COPY . .
-
-# Install dependencies with UV
-RUN uv pip install --system -e .[all]
-
-EXPOSE 8000
-CMD ["python", "app.py"]
-```
-
 ## Migration from pip
 
 If you have an existing pip-based setup:

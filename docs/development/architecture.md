@@ -475,41 +475,29 @@ await logger.info(
 
 ## Deployment Architecture
 
-### 1. Docker Containerization
+### 1. Production Setup
 
-```dockerfile
-# Multi-stage build for optimal image size
-FROM python:3.11-slim as builder
-# Build dependencies and models
+For production deployment, consider the following setup:
 
-FROM python:3.11-slim as runtime
-# Runtime environment
-COPY --from=builder /app /app
-EXPOSE 8000
-CMD ["python", "app.py"]
+```python
+# Production configuration
+app_config = {
+    "host": "0.0.0.0",
+    "port": 8000,
+    "workers": 4,
+    "log_level": "info"
+}
 ```
 
 ### 2. Horizontal Scaling
 
-```yaml
-# Docker Compose for scaling
-version: "3.8"
-services:
-  tts-server:
-    image: danmu-tts:latest
-    ports:
-      - "8000-8010:8000"
-    environment:
-      - BACKEND_MODE=worker
-    deploy:
-      replicas: 5
+The server can be scaled horizontally by running multiple instances behind a load balancer:
 
-  load-balancer:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    depends_on:
-      - tts-server
+```bash
+# Start multiple instances on different ports
+python app.py --port 8001 &
+python app.py --port 8002 &
+python app.py --port 8003 &
 ```
 
 ### 3. Resource Requirements
