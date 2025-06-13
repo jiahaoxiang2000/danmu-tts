@@ -12,6 +12,52 @@
 - **Lock files**: Ensures reproducible builds
 - **Memory efficiency**: Lower memory usage, important for GPU servers
 
+## Chinese Mirror Configuration
+
+For users in China, we've configured Chinese PyPI mirrors for faster downloads:
+
+### Configured Mirrors
+
+The project is pre-configured with Tsinghua University mirror:
+
+- **UV**: Uses `uv.toml` configuration
+- **Pip**: Uses local `pip.conf` configuration
+- **Mirror URL**: `https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple`
+
+### Alternative Mirrors
+
+If you want to use a different mirror, you can choose from:
+
+```bash
+# Alibaba Cloud (recommended for Alibaba Cloud users)
+export UV_INDEX_URL=https://mirrors.aliyun.com/pypi/simple
+
+# Douban (fast in most regions)
+export UV_INDEX_URL=https://pypi.douban.com/simple
+
+# USTC (University of Science and Technology of China)
+export UV_INDEX_URL=https://mirrors.ustc.edu.cn/pypi/web/simple
+
+# Tencent Cloud
+export UV_INDEX_URL=https://mirrors.cloud.tencent.com/pypi/simple
+```
+
+### Manual Mirror Setup
+
+If you need to set up mirrors manually:
+
+```bash
+# For UV (temporary)
+export UV_INDEX_URL=https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+
+# For UV (permanent in project)
+echo 'index-url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"' >> uv.toml
+
+# For pip (global)
+pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+pip config set install.trusted-host mirrors.tuna.tsinghua.edu.cn
+```
+
 ## Quick Start
 
 ### Option 1: Automated Setup (Recommended)

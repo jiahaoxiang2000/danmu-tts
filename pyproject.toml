@@ -2,16 +2,17 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
 [project]
 name = "danmu-tts"
 version = "1.0.0"
 description = "High-performance TTS server for live streaming"
 readme = "README.md"
-requires-python = ">=3.9,<3.12"
-license = {text = "MIT"}
-authors = [
-    {name = "isomo", email = "jiahaoxiang2000@gmail.com"},
-]
+requires-python = ">=3.9,<3.13"
+license = { text = "MIT" }
+authors = [{ name = "isomo", email = "jiahaoxiang2000@gmail.com" }]
 keywords = ["tts", "text-to-speech", "live-streaming", "ai", "gpu"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -33,17 +34,16 @@ dependencies = [
     "pydantic>=2.5.0,<3.0.0",
     "pydantic-settings>=2.1.0,<3.0.0",
     "PyYAML>=6.0.1,<7.0.0",
-    
+
     # Audio processing
     "librosa>=0.10.1,<0.11.0",
     "soundfile>=0.12.1,<0.13.0",
     "numpy>=1.24.3,<2.0.0",
     "scipy>=1.11.4,<2.0.0",
-    
+
     # TTS backends
     "edge-tts>=6.1.9,<7.0.0",
-    "piper-tts>=1.2.0,<2.0.0",
-    
+
     # Caching and utilities
     "aiofiles>=23.2.1,<24.0.0",
     "httpx>=0.25.2,<0.26.0",
@@ -52,11 +52,10 @@ dependencies = [
 
 [project.optional-dependencies]
 # GPU acceleration (CUDA) - separate group due to platform specificity
-gpu = [
-    "torch>=2.0.0,<3.0.0",
-    "torchaudio>=2.0.0,<3.0.0",
-    "TTS>=0.22.0,<1.0.0",
-]
+gpu = ["torch>=2.0.0,<3.0.0", "torchaudio>=2.0.0,<3.0.0", "TTS>=0.22.0,<1.0.0"]
+
+# Local TTS engines - platform specific
+local = ["piper-tts>=1.1.0,<2.0.0"]
 
 # Cloud TTS services - optional
 cloud = [
@@ -65,9 +64,7 @@ cloud = [
 ]
 
 # Caching backends - optional
-cache = [
-    "redis>=5.0.1,<6.0.0",
-]
+cache = ["redis>=5.0.1,<6.0.0"]
 
 # Development tools
 dev = [
@@ -79,9 +76,7 @@ dev = [
 ]
 
 # Complete installation with all features
-all = [
-    "danmu-tts[gpu,cloud,cache,dev]",
-]
+all = ["danmu-tts[gpu,cloud,cache,dev]"]
 
 [project.urls]
 Homepage = "https://github.com/jiahaoxiang2000/danmu-tts"
@@ -123,9 +118,9 @@ select = [
     "UP", # pyupgrade
 ]
 ignore = [
-    "E501",  # line too long, handled by black
-    "B008",  # do not perform function calls in argument defaults
-    "C901",  # too complex
+    "E501", # line too long, handled by black
+    "B008", # do not perform function calls in argument defaults
+    "C901", # too complex
 ]
 
 [tool.ruff.per-file-ignores]
@@ -148,11 +143,7 @@ testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = [
-    "--strict-markers",
-    "--strict-config",
-    "--verbose",
-]
+addopts = ["--strict-markers", "--strict-config", "--verbose"]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "gpu: marks tests that require GPU",
