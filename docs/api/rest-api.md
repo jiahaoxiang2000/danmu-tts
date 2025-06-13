@@ -8,14 +8,6 @@ The Danmu TTS Server provides a comprehensive REST API for text-to-speech conver
 http://localhost:8000
 ```
 
-## Authentication
-
-Currently, the API supports optional API key authentication. If enabled in configuration:
-
-```http
-Authorization: Bearer your-api-key
-```
-
 ## Content Type
 
 All requests should use JSON content type:
@@ -25,6 +17,31 @@ Content-Type: application/json
 ```
 
 ## Endpoints
+
+### Health Check
+
+#### GET /
+
+Basic health check endpoint.
+
+**Response:**
+
+```json
+{
+  "status": "ok",
+  "message": "Danmu TTS Server is running"
+}
+```
+
+**Status Codes:**
+
+- `200`: Success - Server is running
+
+**Example:**
+
+```bash
+curl "http://localhost:8000/"
+```
 
 ### Text-to-Speech
 
@@ -49,9 +66,9 @@ Convert text to speech audio.
 
 - `text` (string, required): Text to convert to speech
 - `voice` (string, optional): Voice ID to use
-- `backend` (string, optional): TTS backend ("edge", "xtts", "piper", "azure", "openai")
-- `quality` (string, optional): Audio quality ("low", "medium", "high", "ultra")
-- `format` (string, optional): Audio format ("wav", "mp3", "ogg")
+- `backend` (string, optional): TTS backend ("edge", "xtts", "piper")
+- `quality` (string, optional): Audio quality ("low", "medium", "high")
+- `format` (string, optional): Audio format ("wav")
 - `sample_rate` (integer, optional): Audio sample rate
 
 **Response:**
@@ -91,25 +108,28 @@ curl -X POST "http://localhost:8000/tts" \
   }'
 ```
 
-#### GET /stream
+#### GET /tts/stream
 
-Stream audio as it's generated (Server-Sent Events).
+Stream audio as it's generated.
 
 **Query Parameters:**
 
 - `text` (string, required): Text to convert
 - `voice` (string, optional): Voice ID
 - `backend` (string, optional): TTS backend
-- `quality` (string, optional): Audio quality
-- `format` (string, optional): Audio format
 
 **Response:**
-Returns a stream of audio chunks as they're generated.
+Returns audio stream with appropriate Content-Type headers.
+
+**Headers:**
+
+- `Content-Type: audio/wav`
+- `Content-Disposition: attachment; filename=tts_audio.wav`
 
 **Example:**
 
 ```bash
-curl "http://localhost:8000/stream?text=Hello&voice=zh-CN-XiaoxiaoNeural" \
+curl "http://localhost:8000/tts/stream?text=Hello&voice=zh-CN-XiaoxiaoNeural" \
   --output audio.wav
 ```
 
@@ -122,51 +142,35 @@ List all available voices across all backends.
 **Query Parameters:**
 
 - `backend` (string, optional): Filter by backend
-- `language` (string, optional): Filter by language code
-- `gender` (string, optional): Filter by gender ("male", "female")
 
 **Response:**
 
 ```json
-{
-  "voices": [
-    {
-      "id": "zh-CN-XiaoxiaoNeural",
-      "name": "Xiaoxiao (Neural)",
-      "language": "zh-CN",
-      "gender": "female",
-      "backend": "edge",
-      "quality": "high"
-    },
-    {
-      "id": "zh_CN-huayan-medium",
-      "name": "Huayan Medium",
-      "language": "zh-CN",
-      "gender": "female",
-      "backend": "piper",
-      "quality": "medium"
-    }
-  ],
-  "total": 2
-}
+[
+  {
+    "id": "zh-CN-XiaoxiaoNeural",
+    "name": "Xiaoxiao (Neural)",
+    "language": "zh-CN",
+    "gender": "female",
+    "backend": "edge",
+    "quality": "medium"
+  },
+  {
+    "id": "zh_CN-huayan-medium",
+    "name": "Huayan Medium",
+    "language": "zh-CN",
+    "gender": "female",
+    "backend": "piper",
+    "quality": "medium"
+  }
+]
 ```
 
 **Example:**
 
 ```bash
-curl "http://localhost:8000/voices?language=zh-CN"
+curl "http://localhost:8000/voices?backend=edge"
 ```
-
-#### GET /voices/{backend}
-
-Get voices for a specific backend.
-
-**Path Parameters:**
-
-- `backend` (string): Backend name
-
-**Response:**
-Same format as `/voices` but filtered by backend.
 
 ### Backend Management
 
@@ -177,292 +181,143 @@ List all available TTS backends and their status.
 **Response:**
 
 ```json
-{
-  "backends": [
-    {
-      "name": "edge",
-      "enabled": true,
-      "status": "available",
-      "version": "1.0",
-      "capabilities": ["realtime", "multiple_voices"],
-      "load": 0.2,
-      "queue_size": 0
-    },
-    {
-      "name": "xtts",
-      "enabled": true,
-      "status": "available",
-      "version": "2.0",
-      "capabilities": ["gpu_acceleration", "voice_cloning"],
-      "load": 0.8,
-      "queue_size": 3
-    }
-  ]
-}
+[
+  {
+    "name": "edge",
+    "enabled": true,
+    "available": true,
+    "load": 0.2,
+    "queue_size": 0
+  },
+  {
+    "name": "xtts",
+    "enabled": true,
+    "available": true,
+    "load": 0.8,
+    "queue_size": 3
+  }
+]
 ```
 
-**Status Values:**
+**Status Fields:**
 
+- `enabled`: Backend is enabled in configuration
 - `available`: Backend is ready to process requests
-- `loading`: Backend is initializing
-- `error`: Backend has encountered an error
-- `disabled`: Backend is disabled in configuration
-
-#### GET /backends/{backend}/status
-
-Get detailed status for a specific backend.
-
-**Path Parameters:**
-
-- `backend` (string): Backend name
-
-**Response:**
-
-```json
-{
-  "name": "xtts",
-  "enabled": true,
-  "status": "available",
-  "version": "2.0.1",
-  "gpu_memory_used": "2.1 GB",
-  "gpu_memory_total": "24 GB",
-  "model_loaded": true,
-  "queue_size": 2,
-  "processing_time_avg": 1.2,
-  "requests_processed": 1523,
-  "errors": 3
-}
-```
+- `load`: Current load factor (0.0 to 1.0)
+- `queue_size`: Number of requests in queue
 
 ### System Information
 
-#### GET /health
+#### GET /stats
 
-Health check endpoint.
-
-**Response:**
-
-```json
-{
-  "status": "healthy",
-  "timestamp": "2025-06-13T10:30:00Z",
-  "version": "1.0.0",
-  "uptime": 3600,
-  "backends_available": 3,
-  "memory_usage": "1.2 GB",
-  "cpu_usage": 25.5
-}
-```
-
-**Status Values:**
-
-- `healthy`: All systems operational
-- `degraded`: Some backends unavailable
-- `unhealthy`: Critical errors
-
-#### GET /info
-
-Detailed system information.
+Get comprehensive server statistics.
 
 **Response:**
 
 ```json
 {
-  "version": "1.0.0",
-  "python_version": "3.11.0",
-  "platform": "Linux-5.15.0-72-generic-x86_64",
-  "gpu_available": true,
-  "gpu_devices": [
+  "uptime": 3600.5,
+  "total_requests": 1523,
+  "cache_hit_rate": 85.2,
+  "active_connections": 3,
+  "backend_status": [
     {
-      "id": 0,
-      "name": "NVIDIA RTX 4090",
-      "memory_total": "24 GB",
-      "memory_used": "2.1 GB"
+      "name": "edge",
+      "enabled": true,
+      "available": true,
+      "load": 0.2,
+      "queue_size": 0
     }
   ],
-  "backends": {
-    "edge": "available",
-    "xtts": "available",
-    "piper": "available"
-  },
-  "cache": {
-    "enabled": true,
-    "size": 156,
-    "hit_rate": 0.85
+  "gpu_usage": {
+    "available": true,
+    "devices": [
+      {
+        "id": 0,
+        "name": "NVIDIA RTX 4090",
+        "memory_total": "24 GB",
+        "memory_used": "2.1 GB"
+      }
+    ]
   }
 }
 ```
 
-#### GET /metrics
+#### GET /health
 
-System metrics in Prometheus format (if enabled).
-
-**Response:**
-
-```
-# HELP tts_requests_total Total number of TTS requests
-# TYPE tts_requests_total counter
-tts_requests_total{backend="edge"} 1523
-tts_requests_total{backend="xtts"} 456
-
-# HELP tts_processing_time_seconds Time spent processing TTS requests
-# TYPE tts_processing_time_seconds histogram
-tts_processing_time_seconds_bucket{backend="edge",le="0.5"} 1200
-tts_processing_time_seconds_bucket{backend="edge",le="1.0"} 1450
-```
-
-### Cache Management
-
-#### GET /cache/stats
-
-Get cache statistics.
+Health check endpoint (alias for `/`).
 
 **Response:**
 
 ```json
 {
-  "enabled": true,
-  "backend": "memory",
-  "size": 156,
-  "max_size": 1000,
-  "memory_usage": "45.2 MB",
-  "hit_rate": 0.85,
-  "miss_rate": 0.15,
-  "total_requests": 2000,
-  "cache_hits": 1700,
-  "cache_misses": 300
-}
-```
-
-#### DELETE /cache
-
-Clear all cached audio.
-
-**Response:**
-
-```json
-{
-  "message": "Cache cleared successfully",
-  "items_removed": 156
-}
-```
-
-#### DELETE /cache/{key}
-
-Remove a specific cache entry.
-
-**Path Parameters:**
-
-- `key` (string): Cache key to remove
-
-**Response:**
-
-```json
-{
-  "message": "Cache entry removed",
-  "key": "edge:zh-CN-XiaoxiaoNeural:hello_world"
-}
-```
-
-### Queue Management
-
-#### GET /queue
-
-Get current processing queue status.
-
-**Response:**
-
-```json
-{
-  "total_queued": 5,
-  "queues": {
-    "edge": {
-      "size": 2,
-      "processing": 1,
-      "avg_wait_time": 0.5
-    },
-    "xtts": {
-      "size": 3,
-      "processing": 1,
-      "avg_wait_time": 2.1
-    }
-  }
+  "status": "ok",
+  "message": "Danmu TTS Server is running"
 }
 ```
 
 ## Error Handling
 
-All API endpoints return errors in a consistent format:
+All API endpoints return errors in a consistent format using standard HTTP status codes and JSON responses:
 
 ```json
 {
-  "error": {
-    "code": "INVALID_VOICE",
-    "message": "Voice 'invalid-voice' not found",
-    "details": {
-      "voice": "invalid-voice",
-      "available_voices": ["zh-CN-XiaoxiaoNeural", "zh-CN-YunxiNeural"]
-    }
-  }
+  "detail": "Voice 'invalid-voice' not found"
 }
 ```
 
 ### Common Error Codes
 
-- `INVALID_TEXT`: Text is empty or too long
-- `INVALID_VOICE`: Voice ID not found
-- `INVALID_BACKEND`: Backend not available
-- `BACKEND_ERROR`: Backend processing failed
-- `QUEUE_FULL`: Processing queue is full
-- `RATE_LIMITED`: Rate limit exceeded
-- `AUTHENTICATION_FAILED`: Invalid API key
-- `VALIDATION_ERROR`: Request validation failed
+- `400`: Bad Request - Invalid parameters or malformed request
+- `422`: Validation Error - Request validation failed
+- `500`: Internal Server Error - Backend processing failed or server error
+- `503`: Service Unavailable - All backends failed
 
-## Rate Limiting
+### Status Codes by Endpoint
 
-API endpoints are subject to rate limiting:
+**POST /tts:**
 
-**Headers:**
+- `200`: Success
+- `422`: Validation error (invalid parameters)
+- `500`: TTS generation failed
 
-```http
-X-RateLimit-Limit: 60
-X-RateLimit-Remaining: 59
-X-RateLimit-Reset: 1623456789
-```
+**GET /tts/stream:**
 
-## Pagination
+- `200`: Success
+- `500`: TTS streaming failed
 
-For endpoints that return lists (like voices), pagination is supported:
+**GET /voices:**
 
-**Query Parameters:**
+- `200`: Success
+- `500`: Failed to retrieve voices
 
-- `page` (integer, default: 1): Page number
-- `limit` (integer, default: 50): Items per page
+**GET /backends:**
 
-**Response Headers:**
+- `200`: Success
+- `500`: Failed to get backend status
 
-```http
-X-Total-Count: 150
-X-Page: 1
-X-Per-Page: 50
-X-Total-Pages: 3
-```
+**GET /stats:**
+
+- `200`: Success
+- `500`: Failed to get server statistics
 
 ## OpenAPI Specification
 
-The complete API specification is available at:
+The server provides automatic API documentation through FastAPI:
+
+Interactive API documentation (Swagger UI):
 
 ```
 http://localhost:8000/docs
 ```
 
-Interactive API documentation (Swagger UI):
+Alternative documentation (ReDoc):
 
 ```
 http://localhost:8000/redoc
 ```
 
-Raw OpenAPI JSON:
+Raw OpenAPI JSON specification:
 
 ```
 http://localhost:8000/openapi.json
@@ -475,29 +330,73 @@ http://localhost:8000/openapi.json
 ```python
 import requests
 import base64
+from typing import Optional, List
 
 class DanmuTTSClient:
-    def __init__(self, base_url="http://localhost:8000"):
+    def __init__(self, base_url: str = "http://localhost:8000"):
         self.base_url = base_url
 
-    def synthesize(self, text, voice=None, backend=None):
+    def synthesize(self, text: str, voice: Optional[str] = None,
+                  backend: Optional[str] = None, quality: Optional[str] = None):
+        """Generate TTS audio from text"""
         response = requests.post(f"{self.base_url}/tts", json={
             "text": text,
             "voice": voice,
-            "backend": backend
+            "backend": backend,
+            "quality": quality
         })
         response.raise_for_status()
         return response.json()
 
-    def get_voices(self, language=None):
-        params = {"language": language} if language else {}
+    def get_voices(self, backend: Optional[str] = None) -> List[dict]:
+        """Get available voices"""
+        params = {"backend": backend} if backend else {}
         response = requests.get(f"{self.base_url}/voices", params=params)
-        return response.json()["voices"]
+        response.raise_for_status()
+        return response.json()
 
-# Usage
+    def get_backends(self) -> List[dict]:
+        """Get backend status"""
+        response = requests.get(f"{self.base_url}/backends")
+        response.raise_for_status()
+        return response.json()
+
+    def get_stats(self) -> dict:
+        """Get server statistics"""
+        response = requests.get(f"{self.base_url}/stats")
+        response.raise_for_status()
+        return response.json()
+
+    def stream_audio(self, text: str, voice: Optional[str] = None,
+                    backend: Optional[str] = None, output_file: str = "output.wav"):
+        """Stream TTS audio to file"""
+        params = {"text": text}
+        if voice:
+            params["voice"] = voice
+        if backend:
+            params["backend"] = backend
+
+        response = requests.get(f"{self.base_url}/tts/stream",
+                              params=params, stream=True)
+        response.raise_for_status()
+
+        with open(output_file, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+
+# Usage examples
 client = DanmuTTSClient()
+
+# Basic text-to-speech
 result = client.synthesize("Hello, world!", voice="zh-CN-XiaoxiaoNeural")
 audio_data = base64.b64decode(result["audio_data"])
+
+# Get available voices
+voices = client.get_voices(backend="edge")
+print(f"Available voices: {len(voices)}")
+
+# Stream audio to file
+client.stream_audio("Hello streaming!", output_file="hello.wav")
 ```
 
 ### JavaScript
@@ -527,18 +426,111 @@ class DanmuTTSClient {
     return await response.json();
   }
 
-  async getVoices(language = null) {
-    const params = language ? `?language=${language}` : "";
+  async getVoices(backend = null) {
+    const params = backend ? `?backend=${backend}` : "";
     const response = await fetch(`${this.baseUrl}/voices${params}`);
-    const data = await response.json();
-    return data.voices;
+
+    if (!response.ok) {
+      throw new Error(`Failed to get voices: ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async getBackends() {
+    const response = await fetch(`${this.baseUrl}/backends`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to get backends: ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async getStats() {
+    const response = await fetch(`${this.baseUrl}/stats`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to get stats: ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async streamAudio(text, options = {}) {
+    const params = new URLSearchParams({ text });
+    if (options.voice) params.append("voice", options.voice);
+    if (options.backend) params.append("backend", options.backend);
+
+    const response = await fetch(`${this.baseUrl}/tts/stream?${params}`);
+
+    if (!response.ok) {
+      throw new Error(`Stream request failed: ${response.statusText}`);
+    }
+
+    return response.blob();
   }
 }
 
-// Usage
+// Usage examples
 const client = new DanmuTTSClient();
-const result = await client.synthesize("Hello, world!", {
-  voice: "zh-CN-XiaoxiaoNeural",
-  backend: "edge",
-});
+
+// Basic text-to-speech
+try {
+  const result = await client.synthesize("Hello, world!", {
+    voice: "zh-CN-XiaoxiaoNeural",
+    backend: "edge",
+  });
+
+  // Convert base64 to audio blob
+  const audioData = atob(result.audio_data);
+  const audioBlob = new Blob(
+    [new Uint8Array([...audioData].map((c) => c.charCodeAt(0)))],
+    { type: "audio/wav" }
+  );
+
+  // Play audio
+  const audio = new Audio(URL.createObjectURL(audioBlob));
+  audio.play();
+} catch (error) {
+  console.error("TTS failed:", error);
+}
+
+// Get available voices
+const voices = await client.getVoices("edge");
+console.log("Available voices:", voices);
+
+// Stream audio
+const audioBlob = await client.streamAudio("Hello streaming!");
+const audio = new Audio(URL.createObjectURL(audioBlob));
+audio.play();
+```
+
+### cURL Examples
+
+```bash
+# Basic TTS request
+curl -X POST "http://localhost:8000/tts" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "你好，世界！",
+    "voice": "zh-CN-XiaoxiaoNeural",
+    "backend": "edge"
+  }'
+
+# Stream audio to file
+curl "http://localhost:8000/tts/stream?text=Hello&voice=zh-CN-XiaoxiaoNeural" \
+  --output audio.wav
+
+# Get available voices
+curl "http://localhost:8000/voices"
+
+# Get backend status
+curl "http://localhost:8000/backends"
+
+# Get server statistics
+curl "http://localhost:8000/stats"
+
+# Health check
+curl "http://localhost:8000/"
 ```
