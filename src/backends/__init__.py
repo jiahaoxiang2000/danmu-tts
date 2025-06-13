@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import List, Optional, AsyncGenerator
-from ..models import VoiceInfo
+from src.models import VoiceInfo
 
 
 class BaseTTSBackend(ABC):

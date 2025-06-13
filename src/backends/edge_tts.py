@@ -5,7 +5,7 @@ import asyncio
 import io
 from typing import List, Optional, AsyncGenerator
 import edge_tts
-from ..models import VoiceInfo
+from src.models import VoiceInfo
 from . import BaseTTSBackend
 
 logger = logging.getLogger(__name__)

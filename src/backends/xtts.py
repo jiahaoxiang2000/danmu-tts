@@ -8,8 +8,8 @@ import torchaudio
 import numpy as np
 from pathlib import Path
 from typing import List, Optional, AsyncGenerator
-from ..models import VoiceInfo
-from ..config import settings
+from src.models import VoiceInfo
+from src.config import settings
 from . import BaseTTSBackend
 
 logger = logging.getLogger(__name__)

@@ -6,7 +6,7 @@ import time
 import pickle
 from typing import Optional, Dict, Any
 from pathlib import Path
-from ..config import settings
+from .config import settings
 
 logger = logging.getLogger(__name__)
 

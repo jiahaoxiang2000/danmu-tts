@@ -6,7 +6,7 @@ import json
 import io
 from pathlib import Path
 from typing import List, Optional, AsyncGenerator
-from ..models import VoiceInfo
+from src.models import VoiceInfo
 from . import BaseTTSBackend
 
 logger = logging.getLogger(__name__)
