@@ -1,35 +1,22 @@
 #!/bin/bash
 
-# TTS Server Startup Script with UV
+# TTS Server Startup Script
 
-echo "🚀 Starting Danmu TTS Server with UV..."
-
-# Check if uv is installed
-if ! command -v uv &> /dev/null; then
-    echo "UV not found. Installing UV..."
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-    source $HOME/.cargo/env
-fi
+echo "🚀 Starting Danmu TTS Server..."
 
 # Check if virtual environment exists
 if [ ! -d ".venv" ]; then
-    echo "Creating virtual environment with UV (Python 3.11)..."
-    uv venv --python 3.11
+    echo "❌ Virtual environment not found!"
+    echo "Please run setup.sh first to install dependencies:"
+    echo "  ./setup.sh"
+    exit 1
 fi
 
 # Activate virtual environment
 echo "Activating virtual environment..."
 source .venv/bin/activate
 
-# Install/update dependencies
-echo "Installing dependencies with UV..."
-uv pip install -e .[all]
-
-# For CUDA support, install PyTorch with CUDA
-echo "Installing PyTorch with CUDA support..."
-uv pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu118
-
-# Create necessary directories
+# Ensure directories exist
 mkdir -p logs cache models/piper models/xtts
 
 # Check GPU availability
