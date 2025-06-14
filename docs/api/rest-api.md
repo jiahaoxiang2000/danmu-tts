@@ -2,6 +2,114 @@
 
 The Danmu TTS Server provides a comprehensive REST API for text-to-speech conversion and system management.
 
+## Server Management
+
+The server includes comprehensive management tools for background operation, monitoring, and automation.
+
+### Quick Start
+
+```bash
+# Setup (first time)
+make setup
+
+# Start server in background
+make start
+
+# Check server status
+make status
+
+# View logs
+make logs
+
+# Stop server
+make stop
+
+# Restart server
+make restart
+```
+
+### Background Operation
+
+The server can run in background mode with automatic process management:
+
+```bash
+# Start in background
+./start_server.sh start
+
+# Start in foreground (development)
+./start_server.sh foreground
+
+# Check status
+./start_server.sh status
+
+# Stop server
+./start_server.sh stop
+
+# Restart server
+./start_server.sh restart
+```
+
+### Process Management
+
+Advanced process monitoring and management:
+
+```bash
+# Show detailed process information
+./process_manager.sh info
+
+# Monitor server in real-time
+./process_manager.sh monitor
+
+# Perform health check
+./process_manager.sh health
+
+# Start auto-restart daemon
+./process_manager.sh auto-restart
+
+# Show performance statistics
+./process_manager.sh performance
+```
+
+### Makefile Commands
+
+Complete project management through Makefile:
+
+| Command          | Description                                |
+| ---------------- | ------------------------------------------ |
+| `make setup`     | Install dependencies and setup environment |
+| `make start`     | Start server in background                 |
+| `make stop`      | Stop the server                            |
+| `make restart`   | Restart the server                         |
+| `make status`    | Show server status                         |
+| `make dev`       | Run server in development mode             |
+| `make logs`      | Show server logs (real-time)               |
+| `make logs-tail` | Show last 50 lines of logs                 |
+| `make test-api`  | Test API endpoints                         |
+| `make test-tts`  | Test TTS functionality                     |
+| `make clean`     | Clean cache and temporary files            |
+| `make info`      | Show system information                    |
+
+### Systemd Service (Optional)
+
+For production deployment, you can install the server as a systemd service:
+
+```bash
+# Copy service file
+sudo cp danmu-tts.service /etc/systemd/system/
+
+# Reload systemd
+sudo systemctl daemon-reload
+
+# Enable service
+sudo systemctl enable danmu-tts
+
+# Start service
+sudo systemctl start danmu-tts
+
+# Check status
+sudo systemctl status danmu-tts
+```
+
 ## Base URL
 
 ```
