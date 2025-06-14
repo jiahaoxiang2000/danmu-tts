@@ -1,0 +1,27 @@
+[Unit]
+Description=Danmu TTS Server
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=xjh
+Group=xjh
+WorkingDirectory=/home/xjh/py/danmu-tts
+Environment=PATH=/home/xjh/py/danmu-tts/.venv/bin
+ExecStart=/home/xjh/py/danmu-tts/.venv/bin/python app.py
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/xjh/py/danmu-tts/logs/tts_server.log
+StandardError=append:/home/xjh/py/danmu-tts/logs/tts_server_error.log
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/xjh/py/danmu-tts/logs /home/xjh/py/danmu-tts/cache
+
+[Install]
+WantedBy=multi-user.target

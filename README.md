@@ -19,12 +19,40 @@ A high-performance Text-to-Speech server designed for live streaming with multip
   - Automatic backend selection based on load
 
 - **Live Streaming Integration**:
+
   - WebSocket support for real-time communication
   - RESTful API for easy integration
   - Audio streaming capabilities
   - Danmu (bullet comment) processing
 
+- **Production-Ready Server Management**:
+  - Background process management with PID tracking
+  - Comprehensive Makefile for all operations
+  - Advanced monitoring and health checks
+  - Auto-restart daemon for high availability
+  - Systemd service support for production deployment
+  - Real-time performance monitoring
+
 ## Quick Start
+
+### Simple Setup and Start
+
+```bash
+# Setup (first time only)
+make setup
+
+# Start server in background
+make start
+
+# Check server status
+make status
+
+# View logs
+make logs
+
+# Stop server
+make stop
+```
 
 ### Option 1: Automated Setup with UV (Recommended)
 
@@ -32,11 +60,30 @@ A high-performance Text-to-Speech server designed for live streaming with multip
 # Run the automated setup script
 ./setup.sh
 
-# Start the server
-./start_server.sh
+# Start the server in background
+./start_server.sh start
+
+# Check server status
+./start_server.sh status
 ```
 
-### Option 2: Manual Setup with UV
+### Option 2: Using Makefile (Recommended for Development)
+
+```bash
+# Install dependencies and setup environment
+make setup
+
+# Start server in development mode (foreground)
+make dev
+
+# Or start in background
+make start
+
+# Test the API
+make test-api
+```
+
+### Option 3: Manual Setup with UV
 
 ```bash
 # Install UV (ultra-fast Python package manager)
@@ -57,7 +104,7 @@ uv pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu1
 python app.py
 ```
 
-### Option 3: Traditional pip Setup
+### Option 4: Traditional pip Setup
 
 ```bash
 python3 -m venv venv
