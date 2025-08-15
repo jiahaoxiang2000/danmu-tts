@@ -17,7 +17,6 @@ cache/
 *.cache
 
 # Models (large files)
-models/
 *.onnx
 *.pth
 *.pt

@@ -1,0 +1,228 @@
+### Danmu TTS Server REST API Test Cases
+### Base URL: http://localhost:8000
+
+### 1. Health Check - Root endpoint
+GET http://localhost:8000/
+Accept: application/json
+
+###
+
+### 2. Health Check - Dedicated endpoint
+GET http://localhost:8000/health
+Accept: application/json
+
+###
+
+### 3. Get All Available Voices
+GET http://localhost:8000/voices
+Accept: application/json
+
+###
+
+### 4. Get Voices by Backend (Edge TTS)
+GET http://localhost:8000/voices?backend=edge
+Accept: application/json
+
+###
+
+### 5. Get Backend Status
+GET http://localhost:8000/backends
+Accept: application/json
+
+###
+
+### 6. Get Server Statistics
+GET http://localhost:8000/stats
+Accept: application/json
+
+###
+
+### 7. Basic TTS Synthesis (Default Settings)
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "Hello, this is a test of the Danmu TTS server!"
+}
+
+###
+
+### 8. TTS Synthesis with Specific Voice (Chinese)
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "你好，欢迎使用弹幕TTS服务器！",
+  "voice": "zh-CN-XiaoxiaoNeural",
+  "backend": "edge"
+}
+
+###
+
+### 9. TTS Synthesis with Quality Setting
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "This is a high quality test.",
+  "voice": "en-US-AriaNeural",
+  "quality": "high",
+  "sample_rate": 24000
+}
+
+###
+
+### 10. TTS Synthesis - Long Text
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "This is a longer text to test the TTS system's ability to handle multiple sentences and generate appropriate audio. The system should be able to process this text efficiently and return high-quality audio data.",
+  "voice": "en-US-JennyNeural"
+}
+
+###
+
+### 11. Streaming TTS - Simple English
+GET http://localhost:8000/tts/stream?text=Hello%20world&voice=en-US-AriaNeural
+Accept: audio/wav
+
+###
+
+### 12. Streaming TTS - Chinese Text
+GET http://localhost:8000/tts/stream?text=你好世界&voice=zh-CN-XiaoxiaoNeural&backend=edge
+Accept: audio/wav
+
+###
+
+### 13. Error Test - Empty Text
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": ""
+}
+
+###
+
+### 14. Error Test - Text Too Long (>1000 chars)
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "This is a very long text that exceeds the maximum allowed length for TTS synthesis. It contains more than 1000 characters to test the validation system. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem."
+}
+
+###
+
+### 15. Error Test - Invalid Backend
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "Testing invalid backend",
+  "backend": "invalid_backend"
+}
+
+###
+
+### 16. Error Test - Invalid Quality
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "Testing invalid quality",
+  "quality": "ultra_high"
+}
+
+###
+
+### 17. Error Test - Invalid Sample Rate
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "Testing invalid sample rate",
+  "sample_rate": 100000
+}
+
+###
+
+### 18. Performance Test - Multiple Requests
+### Run this multiple times to test concurrency
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "Performance test request number 1",
+  "voice": "en-US-AriaNeural"
+}
+
+###
+
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "Performance test request number 2",
+  "voice": "zh-CN-XiaoxiaoNeural"
+}
+
+###
+
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "Performance test request number 3",
+  "voice": "en-US-JennyNeural"
+}
+
+###
+
+### 19. Test Different Languages
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "Bonjour, comment allez-vous?",
+  "voice": "fr-FR-DeniseNeural"
+}
+
+###
+
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "Hola, ¿cómo estás?",
+  "voice": "es-ES-ElviraNeural"
+}
+
+###
+
+POST http://localhost:8000/tts
+Content-Type: application/json
+
+{
+  "text": "Guten Tag, wie geht es Ihnen?",
+  "voice": "de-DE-KatjaNeural"
+}
+
+###
+
+### 20. API Documentation Endpoints
+GET http://localhost:8000/docs
+Accept: text/html
+
+###
+
+GET http://localhost:8000/redoc
+Accept: text/html
+
+###
+
+GET http://localhost:8000/openapi.json
+Accept: application/json
+
+###
