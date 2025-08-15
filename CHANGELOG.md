@@ -19,6 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `make clean` - Clean up temporary files, logs, and Python cache
   - `make help` - Display available commands and usage information
 
+### Fixed
+
+- **Circular import issue** - Resolved circular import between main.py and API modules by extracting TTSManager to dedicated manager.py module
+  - Created new `danmu_tts/manager.py` containing TTSManager class and tts_manager instance
+  - Updated `main.py` to import tts_manager from manager module instead of defining locally
+  - Updated all API modules (tts.py, backends.py, voices.py) to import from `..manager` instead of `..main`
+  - Eliminates circular dependency where main.py imported API modules while API modules imported from main.py
+
 ## [1.0.0] - 2025-08-15
 
 ### Added

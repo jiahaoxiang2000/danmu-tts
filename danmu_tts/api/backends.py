@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from typing import List
 
 from ..models.responses import BackendInfo, StatsResponse, GPUUsage, GPUDevice
-from ..main import tts_manager
+from ..manager import tts_manager
 
 router = APIRouter(tags=["backends"])
 

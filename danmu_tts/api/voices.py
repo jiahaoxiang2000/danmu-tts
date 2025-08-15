@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List
 
 from ..models.responses import VoiceInfo
-from ..main import tts_manager
+from ..manager import tts_manager
 
 router = APIRouter(prefix="/voices", tags=["voices"])
 

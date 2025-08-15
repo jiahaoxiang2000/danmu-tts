@@ -7,7 +7,7 @@ import io
 
 from ..models.requests import TTSRequest, StreamTTSRequest
 from ..models.responses import TTSResponse, AudioMetadata
-from ..main import tts_manager
+from ..manager import tts_manager
 
 router = APIRouter(prefix="/tts", tags=["tts"])
 
