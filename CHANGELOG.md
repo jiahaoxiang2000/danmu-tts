@@ -5,6 +5,20 @@ All notable changes to the Danmu TTS Server project will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Makefile for comprehensive server management** - Added complete Makefile with commands for server lifecycle management, dependency installation, and project maintenance
+  - `make start` - Start the server in background with PID tracking and logging
+  - `make stop` - Stop the server using saved PID with proper process validation
+  - `make restart` - Stop and restart the server with appropriate delay
+  - `make status` - Check if the server is running with PID validation
+  - `make install` - Install production dependencies using uv
+  - `make dev` - Install development dependencies using uv
+  - `make clean` - Clean up temporary files, logs, and Python cache
+  - `make help` - Display available commands and usage information
+
 ## [1.0.0] - 2025-08-15
 
 ### Added
