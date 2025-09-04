@@ -30,7 +30,7 @@ start:
 		echo "Server is already running (PID: $$(cat $(PID_FILE)))"; \
 		exit 1; \
 	fi
-	@nohup python -m danmu_tts.main > $(LOG_FILE) 2>&1 & echo $$! > $(PID_FILE)
+	@nohup uv run python -m danmu_tts.main > $(LOG_FILE) 2>&1 & echo $$! > $(PID_FILE)
 	@echo "Server started (PID: $$(cat $(PID_FILE)))"
 	@echo "Logs: tail -f $(LOG_FILE)"
 
