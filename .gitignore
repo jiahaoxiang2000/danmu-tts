@@ -48,3 +48,5 @@ temp/
 tmp/
 test_output.*
 test_stream.*
+
+*.pid
