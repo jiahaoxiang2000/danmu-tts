@@ -4,119 +4,85 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    pyproject-nix = {
+      url = "github:pyproject-nix/pyproject.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    uv2nix = {
+      url = "github:pyproject-nix/uv2nix";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    pyproject-build-systems = {
+      url = "github:pyproject-nix/build-system-pkgs";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.uv2nix.follows = "uv2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, pyproject-nix, uv2nix, pyproject-build-systems }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        python = pkgs.python312;
+        # Load the workspace from uv.lock
+        workspace = uv2nix.lib.workspace.loadWorkspace { workspaceRoot = ./.; };
 
-        # Build edge-tts from PyPI since it's not in nixpkgs
-        edge-tts = python.pkgs.buildPythonPackage rec {
-          pname = "edge-tts";
-          version = "6.1.0";
-          format = "setuptools";
-
-          src = python.pkgs.fetchPypi {
-            inherit pname version;
-            sha256 = "sha256-FvP9tZV5aw5n1g8AcObgs1xJYNGYzPYyF3Cxf2PJYoM=";
-          };
-
-          propagatedBuildInputs = with python.pkgs; [
-            aiohttp
-            certifi
-          ];
-
-          # Skip tests as they require network access
-          doCheck = false;
-
-          meta = with pkgs.lib; {
-            description = "Use Microsoft Edge's online text-to-speech service from Python";
-            homepage = "https://github.com/rany2/edge-tts";
-            license = licenses.gpl3Plus;
-          };
+        # Create the overlay
+        overlay = workspace.mkPyprojectOverlay {
+          sourcePreference = "wheel";
         };
 
-        danmu-tts = python.pkgs.buildPythonApplication rec {
-          pname = "danmu-tts";
-          version = "1.0.0";
-          format = "pyproject";
-
-          src = ./.;
-
-          nativeBuildInputs = with python.pkgs; [
-            hatchling
-          ];
-
-          propagatedBuildInputs = with python.pkgs; [
-            fastapi
-            uvicorn
-            edge-tts
-            pydantic
-            python-multipart
-            aiofiles
-          ];
-
-          nativeCheckInputs = with python.pkgs; [
-            pytest
-            pytest-asyncio
-            httpx
-          ];
-
-          # Skip tests during build since they might require network access
-          doCheck = false;
-
-          meta = with pkgs.lib; {
-            description = "High-performance TTS server for live streaming";
-            homepage = "https://github.com/jiahaoxiang2000/danmu-tts";
-            license = licenses.mit;
-            maintainers = with maintainers; [ ];
-            platforms = platforms.linux ++ platforms.darwin;
-          };
+        # Extend Python package set with pyproject-build-systems and workspace overlay
+        pythonSet = pkgs.callPackage pyproject-nix.build.packages {
+          python = pkgs.python312;
         };
+
+        # Apply overlays
+        python = pythonSet.overrideScope (
+          pkgs.lib.composeManyExtensions [
+            pyproject-build-systems.overlays.default
+            overlay
+          ]
+        );
+
+        # Create virtual environment
+        venv = python.mkVirtualEnv "danmu-tts-env" workspace.deps.default;
+
+        # Development virtual environment with dev dependencies
+        devVenv = python.mkVirtualEnv "danmu-tts-dev-env" (workspace.deps.default // workspace.deps.dev);
 
       in
       {
         packages = {
-          default = danmu-tts;
-          danmu-tts = danmu-tts;
+          default = venv;
+          danmu-tts = venv;
         };
 
         apps = {
           default = {
             type = "app";
-            program = "${danmu-tts}/bin/danmu-tts";
+            program = "${venv}/bin/danmu-tts";
           };
         };
 
         devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            python
-            python.pkgs.pip
-            python.pkgs.virtualenv
-            python.pkgs.hatchling
-            python.pkgs.fastapi
-            python.pkgs.uvicorn
-            python.pkgs.pydantic
-            python.pkgs.python-multipart
-            python.pkgs.aiofiles
-            python.pkgs.pytest
-            python.pkgs.pytest-asyncio
-            python.pkgs.httpx
-            edge-tts
+          buildInputs = [
+            devVenv
+            pkgs.uv
           ];
 
           shellHook = ''
             echo "Danmu TTS development environment"
             echo "Run 'danmu-tts' to start the server"
+            echo "Python environment: ${devVenv}"
           '';
         };
 
         # For CI/CD and caching
         checks = {
-          build = danmu-tts;
+          build = venv;
         };
       }
     );

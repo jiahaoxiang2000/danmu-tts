@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Nix flake build system refactoring** - Migrated from custom Python package builds to uv2nix and pyproject-nix ecosystem for improved dependency management
+  - Added pyproject-nix, uv2nix, and pyproject-build-systems as flake inputs
+  - Replaced manual buildPythonPackage and buildPythonApplication with workspace-based virtual environments
+  - Removed custom edge-tts package build in favor of uv.lock-based dependency resolution
+  - Updated development shell to use dev virtual environment with proper dependencies
+  - Improved reproducibility and alignment with Python packaging standards
+
 ### Added
 
 - **Makefile for comprehensive server management** - Added complete Makefile with commands for server lifecycle management, dependency installation, and project maintenance
